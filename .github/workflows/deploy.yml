@@ -1,0 +1,80 @@
+name: Deploy to Azure SWA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install API Dependencies
+        run: |
+          cd api
+          npm install --production
+
+      - name: Run Unit Tests
+        run: node scripts/run-tests.js
+
+      - name: Start Local Server for Integration Tests
+        run: |
+          npx http-server . -p 8080 &
+          sleep 3
+
+      - name: Run Integration Tests
+        run: |
+          # 检查 index.html 是否存在
+          if [ ! -f "index.html" ]; then
+            echo "❌ index.html not found"
+            exit 1
+          fi
+          echo "✅ index.html exists"
+
+          # 检查关键内容
+          if grep -q "EbbinghausEngine" index.html && grep -q "QuestionGenerator" index.html && grep -q "APIService" index.html; then
+            echo "✅ Key components found in index.html"
+          else
+            echo "❌ Missing key components in index.html"
+            exit 1
+          fi
+
+          # 检查 API 文件
+          if [ -f "api/GetProgress/index.js" ] && [ -f "api/UpdateProgress/index.js" ]; then
+            echo "✅ API functions exist"
+          else
+            echo "❌ Missing API functions"
+            exit 1
+          fi
+
+          echo "✅ Integration tests passed"
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install API Dependencies
+        run: |
+          cd api
+          npm install --production
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/"
+          api_location: "/api"
+          output_location: "/"

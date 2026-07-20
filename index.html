@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>英文单词闪卡</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --bg-card: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+    }
+
+    .app-container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    /* ─── 头部 ─── */
+    .header-logo {
+      text-align: center;
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .header-logo h1 { font-size: 1.4rem; font-weight: 700; margin: 0; }
+    .header-logo p { opacity: 0.8; margin: 4px 0 0; font-size: 0.85rem; }
+
+    /* ─── 页面切换 ─── */
+    .page { display: none; }
+    .page.active { display: block; animation: fadeIn 0.35s ease; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── 主题选择页 ─── */
+    .section-label {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 20px 0 10px;
+    }
+
+    .theme-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .theme-card {
+      background: rgba(255,255,255,0.12);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+      color: white;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .theme-card:hover {
+      background: rgba(255,255,255,0.22);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-3px);
+    }
+
+    .theme-card.active {
+      background: white;
+      border-color: white;
+      color: #764ba2;
+    }
+
+    .theme-card .icon { font-size: 2rem; margin-bottom: 8px; }
+    .theme-card .title { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .theme-card .desc  { font-size: 0.75rem; opacity: 0.8; }
+    .theme-card .count {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 0.65rem;
+      background: rgba(0,0,0,0.15);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .theme-card.active .count {
+      background: rgba(118,75,162,0.12);
+      color: #764ba2;
+    }
+
+    /* ─── 开始按钮 ─── */
+    .start-btn-wrap {
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    .start-btn {
+      background: white;
+      color: #764ba2;
+      border: none;
+      padding: 14px 48px;
+      border-radius: 30px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .start-btn.ready {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .start-btn.ready:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+
+    /* ─── 答题页 ─── */
+    .theme-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .theme-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .back-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover { background: rgba(255,255,255,0.3); }
+
+    .streak-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      margin-bottom: 14px;
+    }
+
+    /* ─── 进度条 ─── */
+    .progress-bar-custom {
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.2);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+      transition: width 0.5s ease;
+    }
+
+    /* ─── 单词卡片 ─── */
+    .flash-card {
+      background: var(--bg-card);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      padding: 36px 28px;
+      text-align: center;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: transform 0.3s ease;
+    }
+
+    .flash-card:hover { transform: translateY(-3px); }
+
+    .word-display {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 6px;
+    }
+
+    .question-hint {
+      font-size: 1rem;
+      color: #6b7280;
+    }
+
+    .question-hint b { color: var(--primary); }
+
+    /* ─── 选项 ─── */
+    .options-list {
+      margin-top: 20px;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      padding: 15px 20px;
+      margin-bottom: 10px;
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      background: white;
+      font-size: 1.05rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background: #eef2ff;
+      transform: translateX(4px);
+    }
+
+    .option-btn.correct {
+      border-color: var(--success);
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .option-btn.wrong {
+      border-color: var(--danger);
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .option-btn:disabled { cursor: default; }
+
+    /* ─── 反馈 ─── */
+    .feedback-area {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      display: none;
+      text-align: center;
+    }
+
+    .feedback-area.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .next-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      padding: 11px 36px;
+      border-radius: 30px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 12px;
+    }
+
+    .next-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 18px rgba(102,126,234,0.4);
+    }
+
+    /* ─── 统计栏 ─── */
+    .stats-bar {
+      display: flex;
+      justify-content: space-between;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.82rem;
+      margin-top: 16px;
+    }
+
+    /* ─── 无更多题目 ─── */
+    .empty-state {
+      text-align: center;
+      color: white;
+      padding: 40px 0;
+    }
+
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+    .empty-state p { opacity: 0.85; margin: 4px 0; }
+
+    @media (max-width: 576px) {
+      .word-display { font-size: 2rem; }
+      .flash-card { padding: 28px 20px; }
+      .theme-card { padding: 16px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="header-logo">
+      <h1>📇 单词闪卡</h1>
+      <p>艾宾浩斯记忆曲线 · 智能复习</p>
+    </div>
+
+    <!-- ════════ 页面 1: 主题选择 ════════ -->
+    <div class="page active" id="pageTheme">
+      <div class="section-label">🔤 动词变形</div>
+      <div class="theme-group">
+        <div class="theme-card" data-theme="thirdPerson" data-count="30">
+          <span class="count"></span>
+          <div class="icon">🅰️</div>
+          <div class="title">第三人称单数</div>
+          <div class="desc">go → goes</div>
+        </div>
+        <div class="theme-card" data-theme="presentParticiple" data-count="30">
+          <span class="count"></span>
+          <div class="icon">🔤</div>
+          <div class="title">ing 形式</div>
+          <div class="desc">go → going</div>
+        </div>
+        <div class="theme-card" data-theme="pastTense" data-count="30">
+          <span class="count"></span>
+          <div class="icon">⏪</div>
+          <div class="title">过去式</div>
+          <div class="desc">go → went</div>
+        </div>
+        <div class="theme-card" data-theme="plural" data-count="30">
+          <span class="count"></span>
+          <div class="icon">🔢</div>
+          <div class="title">名词复数</div>
+          <div class="desc">apple → apples</div>
+        </div>
+      </div>
+
+      <div class="start-btn-wrap">
+        <button class="start-btn" id="startBtn" onclick="startQuiz()">开始练习</button>
+      </div>
+    </div>
+
+    <!-- ════════ 页面 2: 答题 ════════ -->
+    <div class="page" id="pageQuiz">
+      <div class="theme-bar">
+        <span class="theme-tag" id="themeTag"><i class="bi bi-arrow-left"></i> <span id="themeLabel"></span></span>
+        <button class="back-btn" onclick="backToTheme()"><i class="bi bi-arrow-return-left"></i> 返回</button>
+      </div>
+
+      <div class="streak-badge">
+        <i class="bi bi-lightning-charge-fill"></i>
+        <span id="streakCount">连续正确: 0</span>
+      </div>
+
+      <div class="progress-bar-custom">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+      </div>
+
+      <div class="flash-card" id="flashCard">
+        <div class="word-display" id="wordDisplay">—</div>
+        <div class="question-hint" id="questionHint"></div>
+      </div>
+
+      <div class="options-list" id="optionsList"></div>
+
+      <div class="feedback-area" id="feedbackArea">
+        <div id="feedbackText"></div>
+        <button class="next-btn" onclick="nextQuestion()">下一题 →</button>
+      </div>
+
+      <!-- 无更多题目状态 -->
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="icon">🎉</div>
+        <p><b>本组单词已全部掌握！</b></p>
+        <p style="font-size:0.85rem;">所有单词都在复习间隔内，休息一下或换个主题吧</p>
+      </div>
+
+      <div class="stats-bar">
+        <span>总题数: <b id="totalCount">0</b></span>
+        <span>正确率: <b id="accuracyRate">--</b></span>
+        <span>熟练度: <b id="proficiencyDisplay">--</b></span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // ==================== 词库数据 ====================
+    const WORD_BANK = {
+      verb: [
+        { id:'v001', word:'go',      meaning:'去',   forms:{ thirdPerson:'goes',       presentParticiple:'going',      pastTense:'went' }},
+        { id:'v002', word:'do',      meaning:'做',   forms:{ thirdPerson:'does',       presentParticiple:'doing',      pastTense:'did' }},
+        { id:'v003', word:'have',    meaning:'有',   forms:{ thirdPerson:'has',        presentParticiple:'having',     pastTense:'had' }},
+        { id:'v004', word:'be',      meaning:'是',   forms:{ thirdPerson:'is',         presentParticiple:'being',      pastTense:'was/were' }},
+        { id:'v005', word:'take',    meaning:'拿',   forms:{ thirdPerson:'takes',      presentParticiple:'taking',     pastTense:'took' }},
+        { id:'v006', word:'make',    meaning:'制作', forms:{ thirdPerson:'makes',      presentParticiple:'making',     pastTense:'made' }},
+        { id:'v007', word:'come',    meaning:'来',   forms:{ thirdPerson:'comes',      presentParticiple:'coming',     pastTense:'came' }},
+        { id:'v008', word:'see',     meaning:'看见', forms:{ thirdPerson:'sees',       presentParticiple:'seeing',     pastTense:'saw' }},
+        { id:'v009', word:'know',    meaning:'知道', forms:{ thirdPerson:'knows',      presentParticiple:'knowing',    pastTense:'knew' }},
+        { id:'v010', word:'get',     meaning:'得到', forms:{ thirdPerson:'gets',       presentParticiple:'getting',    pastTense:'got' }},
+        { id:'v011', word:'give',    meaning:'给',   forms:{ thirdPerson:'gives',      presentParticiple:'giving',     pastTense:'gave' }},
+        { id:'v012', word:'find',    meaning:'找到', forms:{ thirdPerson:'finds',      presentParticiple:'finding',    pastTense:'found' }},
+        { id:'v013', word:'think',   meaning:'想',   forms:{ thirdPerson:'thinks',     presentParticiple:'thinking',   pastTense:'thought' }},
+        { id:'v014', word:'tell',    meaning:'告诉', forms:{ thirdPerson:'tells',      presentParticiple:'telling',    pastTense:'told' }},
+        { id:'v015', word:'become',  meaning:'变成', forms:{ thirdPerson:'becomes',    presentParticiple:'becoming',   pastTense:'became' }},
+        { id:'v016', word:'leave',   meaning:'离开', forms:{ thirdPerson:'leaves',     presentParticiple:'leaving',    pastTense:'left' }},
+        { id:'v017', word:'put',     meaning:'放',   forms:{ thirdPerson:'puts',       presentParticiple:'putting',    pastTense:'put' }},
+        { id:'v018', word:'mean',    meaning:'意思是',forms:{ thirdPerson:'means',      presentParticiple:'meaning',    pastTense:'meant' }},
+        { id:'v019', word:'keep',    meaning:'保持', forms:{ thirdPerson:'keeps',      presentParticiple:'keeping',    pastTense:'kept' }},
+        { id:'v020', word:'let',     meaning:'让',   forms:{ thirdPerson:'lets',       presentParticiple:'letting',    pastTense:'let' }},
+        { id:'v021', word:'begin',   meaning:'开始', forms:{ thirdPerson:'begins',     presentParticiple:'beginning',  pastTense:'began' }},
+        { id:'v022', word:'seem',    meaning:'似乎', forms:{ thirdPerson:'seems',      presentParticiple:'seeming',    pastTense:'seemed' }},
+        { id:'v023', word:'help',    meaning:'帮助', forms:{ thirdPerson:'helps',      presentParticiple:'helping',    pastTense:'helped' }},
+        { id:'v024', word:'show',    meaning:'展示', forms:{ thirdPerson:'shows',      presentParticiple:'showing',    pastTense:'showed' }},
+        { id:'v025', word:'hear',    meaning:'听见', forms:{ thirdPerson:'hears',      presentParticiple:'hearing',    pastTense:'heard' }},
+        { id:'v026', word:'play',    meaning:'玩',   forms:{ thirdPerson:'plays',      presentParticiple:'playing',    pastTense:'played' }},
+        { id:'v027', word:'run',     meaning:'跑',   forms:{ thirdPerson:'runs',       presentParticiple:'running',    pastTense:'ran' }},
+        { id:'v028', word:'move',    meaning:'移动', forms:{ thirdPerson:'moves',      presentParticiple:'moving',     pastTense:'moved' }},
+        { id:'v029', word:'live',    meaning:'居住', forms:{ thirdPerson:'lives',      presentParticiple:'living',     pastTense:'lived' }},
+        { id:'v030', word:'believe', meaning:'相信', forms:{ thirdPerson:'believes',   presentParticiple:'believing',  pastTense:'believed' }}
+      ],
+      noun: [
+        { id:'n001', word:'apple',   meaning:'苹果',   plural:'apples' },
+        { id:'n002', word:'book',    meaning:'书',     plural:'books' },
+        { id:'n003', word:'cat',     meaning:'猫',     plural:'cats' },
+        { id:'n004', word:'dog',     meaning:'狗',     plural:'dogs' },
+        { id:'n005', word:'box',     meaning:'盒子',   plural:'boxes' },
+        { id:'n006', word:'bus',     meaning:'公交',   plural:'buses' },
+        { id:'n007', word:'watch',   meaning:'手表',   plural:'watches' },
+        { id:'n008', word:'dish',    meaning:'盘子',   plural:'dishes' },
+        { id:'n009', word:'city',    meaning:'城市',   plural:'cities' },
+        { id:'n010', word:'baby',    meaning:'婴儿',   plural:'babies' },
+        { id:'n011', word:'knife',   meaning:'刀',     plural:'knives' },
+        { id:'n012', word:'life',    meaning:'生活',   plural:'lives' },
+        { id:'n013', word:'leaf',    meaning:'叶子',   plural:'leaves' },
+        { id:'n014', word:'shelf',   meaning:'架子',   plural:'shelves' },
+        { id:'n015', word:'wolf',    meaning:'狼',     plural:'wolves' },
+        { id:'n016', word:'half',    meaning:'一半',   plural:'halves' },
+        { id:'n017', word:'potato',  meaning:'土豆',   plural:'potatoes' },
+        { id:'n018', word:'tomato',  meaning:'西红柿', plural:'tomatoes' },
+        { id:'n019', word:'hero',    meaning:'英雄',   plural:'heroes' },
+        { id:'n020', word:'child',   meaning:'孩子',   plural:'children' },
+        { id:'n021', word:'tooth',   meaning:'牙齿',   plural:'teeth' },
+        { id:'n022', word:'foot',    meaning:'脚',     plural:'feet' },
+        { id:'n023', word:'mouse',   meaning:'老鼠',   plural:'mice' },
+        { id:'n024', word:'man',     meaning:'男人',   plural:'men' },
+        { id:'n025', word:'woman',   meaning:'女人',   plural:'women' },
+        { id:'n026', word:'sheep',   meaning:'绵羊',   plural:'sheep' },
+        { id:'n027', word:'deer',    meaning:'鹿',     plural:'deer' },
+        { id:'n028', word:'fish',    meaning:'鱼',     plural:'fish' },
+        { id:'n029', word:'person',  meaning:'人',     plural:'people' },
+        { id:'n030', word:'ox',      meaning:'公牛',   plural:'oxen' }
+      ]
+    };
+
+    // 主题元数据
+    const THEME_META = {
+      thirdPerson:     { label:'第三人称单数', category:'verb', icon:'🅰️' },
+      presentParticiple:{ label:'ing 形式',     category:'verb', icon:'🔤' },
+      pastTense:       { label:'过去式',         category:'verb', icon:'⏪' },
+      plural:          { label:'名词复数',       category:'noun', icon:'🔢' }
+    };
+
+    // ==================== 艾宾浩斯记忆引擎 ====================
+    const Ebbinghaus = {
+      next(correct, cur) {
+        const ease = correct ? cur.ease + 0.1 : Math.max(1.3, cur.ease - 0.2);
+        const interval = correct ? Math.max(1, cur.interval * ease) : 1;
+        const reviewCount = cur.reviewCount + 1;
+        const correctCount = cur.correctCount + (correct ? 1 : 0);
+        const accuracy = correctCount / reviewCount;
+        const proficiency = Math.min(1.0, 1 / (1 + Math.exp(-0.5 * (reviewCount * accuracy - 3))));
+
+        return {
+          ...cur,
+          ease: Math.round(ease * 100) / 100,
+          interval: Math.round(interval),
+          reviewCount,
+          correctCount,
+          accuracy: Math.round(accuracy * 100) / 100,
+          proficiency: Math.round(proficiency * 100) / 100,
+          lastReviewed: Date.now(),
+          nextReview: Date.now() + Math.round(interval) * 86400000
+        };
+      },
+
+      init(wordId, word, category) {
+        return {
+          wordId, word, category,
+          ease: 2.5, interval: 1,
+          reviewCount: 0, correctCount: 0,
+          accuracy: 0, proficiency: 0,
+          lastReviewed: null, nextReview: Date.now()
+        };
+      }
+    };
+
+    // ==================== 题目生成器 ====================
+    const QuestionGen = {
+      questionText(theme) {
+        return {
+          thirdPerson: '的第三人称单数形式是？',
+          presentParticiple: '的现在分词（-ing）形式是？',
+          pastTense: '的过去式是？',
+          plural: '的复数形式是？'
+        }[theme] || '的正确形式是？';
+      },
+
+      correctAnswer(word, theme) {
+        if (theme === 'plural') return word.plural;
+        return word.forms?.[theme] || null;
+      },
+
+      options(word, theme) {
+        const correct = this.correctAnswer(word, theme);
+        if (!correct) return [];
+
+        let candidates = [];
+
+        if (word.category === 'verb' && word.forms) {
+          // 动词：用该词自身的其他变形作为干扰项
+          const otherForms = [
+            word.word,                              // 原形
+            word.forms.thirdPerson,                  // 三单
+            word.forms.presentParticiple,            // ing
+            word.forms.pastTense                     // 过去式
+          ];
+          // 去重 + 去掉正确答案
+          const unique = [...new Set(otherForms)].filter(v => v && v !== correct);
+          candidates = unique;
+
+          // 如果变形种类不够，加一些常见的拼写错误干扰项
+          const misspellings = this._verbMisspellings(word, correct);
+          misspellings.forEach(m => {
+            if (!candidates.includes(m)) candidates.push(m);
+          });
+        } else {
+          // 名词：原形 + 正确复数 + 常见错误变形
+          candidates = [word.word, correct];
+          const nounMistakes = this._nounMistakes(word, correct);
+          nounMistakes.forEach(m => {
+            if (!candidates.includes(m)) candidates.push(m);
+          });
+        }
+
+        // 收集够 3 个干扰项（排除正确答案）
+        const distractors = candidates.filter(c => c !== correct).sort(() => Math.random() - 0.5).slice(0, 3);
+        // 如果还是不够，用通用兜底
+        while (distractors.length < 3) {
+          const fallback = correct + (Math.random() > 0.5 ? 's' : 'es');
+          if (!distractors.includes(fallback)) distractors.push(fallback);
+          else break;
+        }
+
+        return [...distractors, correct].sort(() => Math.random() - 0.5);
+      },
+
+      // 动词常见的拼写错误干扰项
+      _verbMisspellings(word, correct) {
+        const base = word.word;
+        const errs = [];
+        // go → gos, gose 等
+        if (!correct.endsWith('es')) errs.push(base + 'es');
+        if (!correct.endsWith('s')) errs.push(base + 's');
+        if (!correct.endsWith('ed')) errs.push(base + 'ed');
+        if (!correct.endsWith('ing')) errs.push(base + 'ing');
+        return errs;
+      },
+
+      // 名词常见的错误变形
+      _nounMistakes(word, correct) {
+        const base = word.word;
+        const errs = [];
+        // 规则变化干扰：加 -s / -es / -ies
+        if (correct !== base + 's') errs.push(base + 's');
+        if (correct !== base + 'es') errs.push(base + 'es');
+        // 以 y 结尾的名词：city → citys (错误) vs cities (正确)
+        if (base.endsWith('y') && correct !== base.slice(0, -1) + 'ys') {
+          errs.push(base.slice(0, -1) + 'ys');
+        }
+        // f/fe 结尾：knife → knifes (错误) vs knives (正确)
+        if (base.endsWith('f') && correct !== base + 's') errs.push(base + 's');
+        if (base.endsWith('fe') && correct !== base + 's') errs.push(base + 's');
+        // 不规则复数加额外干扰：child → childs, tooth → tooths
+        if (word.plural !== base + 's' && word.plural !== base + 'es') {
+          errs.push(base + 's');
+        }
+        return errs;
+      }
+    };
+
+    // ==================== API 服务 ====================
+    const API = {
+      async getProgress(uid) {
+        try {
+          const res = await fetch(`/api/GetProgress?userId=${uid}`);
+          if (res.ok) { const d = await res.json(); return d.items || []; }
+        } catch { /* offline */ }
+        const s = localStorage.getItem(`progress_${uid}`);
+        return s ? JSON.parse(s) : [];
+      },
+
+      async updateProgress(uid, p) {
+        try {
+          const res = await fetch('/api/UpdateProgress', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ ...p, userId: uid })
+          });
+          if (res.ok) return await res.json();
+        } catch { /* offline */ }
+        // localStorage fallback
+        const arr = JSON.parse(localStorage.getItem(`progress_${uid}`) || '[]');
+        const idx = arr.findIndex(x => x.wordId === p.wordId);
+        if (idx >= 0) arr[idx] = p; else arr.push(p);
+        localStorage.setItem(`progress_${uid}`, JSON.stringify(arr));
+        return { success: true };
+      }
+    };
+
+    // ==================== 全局状态 ====================
+    let currentTheme = null;
+    let currentWord = null;
+    let userProgress = {};
+    let streak = 0;
+    let totalAnswered = 0;
+    let totalCorrect = 0;
+    let isAnswered = false;
+
+    // userId 持久化
+    let userId = localStorage.getItem('deviceId');
+    if (!userId) {
+      userId = 'u' + Math.random().toString(36).substring(2, 10);
+      localStorage.setItem('deviceId', userId);
+    }
+
+    // ==================== 主题选择页 ====================
+    function initThemePage() {
+      const cards = document.querySelectorAll('.theme-card');
+      cards.forEach(card => {
+        const theme = card.dataset.theme;
+        const meta = THEME_META[theme];
+        const pool = WORD_BANK[meta.category];
+        card.querySelector('.count').textContent = `${pool.length} 题`;
+
+        card.addEventListener('click', () => {
+          cards.forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          currentTheme = theme;
+          document.getElementById('startBtn').classList.add('ready');
+        });
+      });
+    }
+
+    function startQuiz() {
+      if (!currentTheme) return;
+      showPage('pageQuiz');
+      document.getElementById('themeLabel').textContent = THEME_META[currentTheme].label;
+      updateStats();
+      nextQuestion();
+    }
+
+    function backToTheme() {
+      showPage('pageTheme');
+      currentTheme = null;
+      document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+      document.getElementById('startBtn').classList.remove('ready');
+    }
+
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // ==================== 答题逻辑 ====================
+    async function nextQuestion() {
+      document.getElementById('feedbackArea').classList.remove('show');
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('optionsList').innerHTML = '';
+      isAnswered = false;
+
+      const meta = THEME_META[currentTheme];
+      const pool = WORD_BANK[meta.category];
+      const now = Date.now();
+
+      // 优先选择待复习的单词
+      let candidates = pool.filter(w => {
+        const p = userProgress[w.id];
+        return !p || p.nextReview <= now;
+      });
+
+      if (candidates.length === 0) {
+        // 全部在复习间隔内
+        document.getElementById('emptyState').style.display = 'block';
+        return;
+      }
+
+      currentWord = candidates[Math.floor(Math.random() * candidates.length)];
+
+      // 渲染卡片
+      document.getElementById('wordDisplay').textContent = currentWord.word;
+      document.getElementById('questionHint').innerHTML =
+        `${currentWord.meaning} <span style="color:#9ca3af;font-size:0.85rem;">(${meta.label})</span>`;
+
+      // 生成选项
+      const opts = QuestionGen.options(currentWord, currentTheme);
+      renderOptions(opts);
+    }
+
+    function renderOptions(options) {
+      const container = document.getElementById('optionsList');
+      container.innerHTML = '';
+
+      options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = `${String.fromCharCode(65 + i)}. ${opt}`;
+        btn.onclick = () => selectAnswer(opt, btn);
+        container.appendChild(btn);
+      });
+    }
+
+    async function selectAnswer(selected, btn) {
+      if (isAnswered) return;
+      isAnswered = true;
+
+      const correct = QuestionGen.correctAnswer(currentWord, currentTheme);
+      const allBtns = document.querySelectorAll('.option-btn');
+      const isCorrect = selected === correct;
+
+      allBtns.forEach(b => b.disabled = true);
+
+      if (isCorrect) {
+        btn.classList.add('correct');
+        streak++;
+        totalCorrect++;
+      } else {
+        btn.classList.add('wrong');
+        allBtns.forEach(b => {
+          if (b.textContent.includes(correct)) b.classList.add('correct');
+        });
+        streak = 0;
+      }
+      totalAnswered++;
+
+      // 更新进度
+      let progress = userProgress[currentWord.id];
+      if (!progress) progress = Ebbinghaus.init(currentWord.id, currentWord.word, THEME_META[currentTheme].category);
+      progress = Ebbinghaus.next(isCorrect, progress);
+      userProgress[currentWord.id] = progress;
+
+      await API.updateProgress(userId, progress);
+
+      // 反馈
+      const fb = document.getElementById('feedbackArea');
+      const ft = document.getElementById('feedbackText');
+
+      if (isCorrect) {
+        ft.innerHTML = `
+          <div style="color:#10b981;font-size:1.1rem;font-weight:600;">
+            <i class="bi bi-check-circle-fill"></i> 回答正确！
+          </div>
+          <div style="margin:8px 0;font-size:0.95rem;color:#374151;">
+            ${currentWord.word} → <b>${correct}</b>
+          </div>
+          <div style="font-size:0.8rem;color:#9ca3af;">
+            熟练度 ${Math.round(progress.proficiency * 100)}% · ${progress.interval}天后复习
+          </div>`;
+      } else {
+        ft.innerHTML = `
+          <div style="color:#ef4444;font-size:1.1rem;font-weight:600;">
+            <i class="bi bi-x-circle-fill"></i> 回答错误
+          </div>
+          <div style="margin:8px 0;font-size:0.95rem;color:#374151;">
+            正确答案: <b>${correct}</b>
+          </div>
+          <div style="font-size:0.8rem;color:#9ca3af;">
+            间隔已重置，请加强记忆
+          </div>`;
+      }
+
+      fb.classList.add('show');
+      updateStats();
+    }
+
+    function updateStats() {
+      document.getElementById('streakCount').textContent = `连续正确: ${streak}`;
+      document.getElementById('totalCount').textContent = totalAnswered;
+
+      const acc = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+      document.getElementById('accuracyRate').textContent = `${acc}%`;
+
+      const vals = Object.values(userProgress);
+      const avg = vals.length > 0
+        ? Math.round((vals.reduce((s, p) => s + (p.proficiency || 0), 0) / vals.length) * 100)
+        : 0;
+      document.getElementById('proficiencyDisplay').textContent = `${avg}%`;
+      document.getElementById('progressFill').style.width = `${Math.min(100, avg)}%`;
+    }
+
+    // ==================== 键盘快捷键 ====================
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('pageQuiz').classList.contains('active')) return;
+
+      if (e.key >= '1' && e.key <= '4' && !isAnswered) {
+        const idx = parseInt(e.key) - 1;
+        const btns = document.querySelectorAll('.option-btn');
+        if (btns[idx] && !btns[idx].disabled) btns[idx].click();
+      } else if (e.key === 'Enter' && isAnswered) {
+        nextQuestion();
+      }
+    });
+
+    // ==================== 初始化 ====================
+    (async () => {
+      initThemePage();
+
+      // 加载进度
+      const items = await API.getProgress(userId);
+      items.forEach(p => { userProgress[p.wordId] = p; });
+
+      updateStats();
+    })();
+  </script>
+</body>
+</html>
