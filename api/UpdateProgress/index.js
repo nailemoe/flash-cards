@@ -5,6 +5,7 @@ module.exports = async function (context, req) {
   if (!body || !body.userId || !body.wordId) {
     context.res = {
       status: 400,
+      headers: { 'Content-Type': 'application/json' },
       body: { error: 'userId and wordId are required' }
     };
     return;
@@ -20,6 +21,7 @@ module.exports = async function (context, req) {
     if (!connectionString) {
       context.res = {
         status: 200,
+        headers: { 'Content-Type': 'application/json' },
         body: {
           success: true,
           message: 'Cosmos DB not configured, update skipped'
@@ -66,6 +68,7 @@ module.exports = async function (context, req) {
     context.log.error('UpdateProgress error:', error);
     context.res = {
       status: 500,
+      headers: { 'Content-Type': 'application/json' },
       body: { error: 'Failed to update progress', details: error.message }
     };
   }

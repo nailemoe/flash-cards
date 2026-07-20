@@ -6,6 +6,7 @@ module.exports = async function (context, req) {
   if (!userId) {
     context.res = {
       status: 400,
+      headers: { 'Content-Type': 'application/json' },
       body: { error: 'userId is required' }
     };
     return;
@@ -21,6 +22,7 @@ module.exports = async function (context, req) {
     if (!connectionString) {
       context.res = {
         status: 200,
+        headers: { 'Content-Type': 'application/json' },
         body: {
           userId,
           items: [],
@@ -53,6 +55,7 @@ module.exports = async function (context, req) {
     context.log.error('GetProgress error:', error);
     context.res = {
       status: 500,
+      headers: { 'Content-Type': 'application/json' },
       body: { error: 'Failed to fetch progress', details: error.message }
     };
   }
