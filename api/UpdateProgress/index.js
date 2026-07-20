@@ -1,6 +1,5 @@
-const { CosmosClient } = require('@azure/cosmos');
-
 module.exports = async function (context, req) {
+
   const body = req.body;
 
   if (!body || !body.userId || !body.wordId) {
@@ -12,6 +11,7 @@ module.exports = async function (context, req) {
   }
 
   try {
+    const { CosmosClient } = require('@azure/cosmos');
     const connectionString = process.env.COSMOS_CONNECTION_STRING;
     const databaseId = process.env.COSMOS_DATABASE || 'flashcards-db';
     const containerId = process.env.COSMOS_CONTAINER || 'progress';
