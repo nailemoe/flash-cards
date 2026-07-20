@@ -626,8 +626,10 @@
         try {
           const res = await fetch(`/api/GetProgress?userId=${uid}`);
           if (res.ok) { const d = await res.json(); return d.items || []; }
-          const errDetail = await res.json().catch(() => res.text()).catch(() => res.statusText);
-          console.error(`GetProgress failed [HTTP ${res.status}]:`, errDetail);
+          const text = await res.text();
+          let detail;
+          try { detail = JSON.parse(text); } catch { detail = text; }
+          console.error(`GetProgress failed [HTTP ${res.status}]:`, detail || res.statusText || 'No response body');
         } catch (err) {
           console.error('GetProgress network error:', err);
         }
@@ -642,8 +644,10 @@
             body: JSON.stringify({ ...p, userId: uid })
           });
           if (res.ok) return await res.json();
-          const errDetail = await res.json().catch(() => res.text()).catch(() => res.statusText);
-          console.error(`UpdateProgress failed [HTTP ${res.status}]:`, errDetail);
+          const text = await res.text();
+          let detail;
+          try { detail = JSON.parse(text); } catch { detail = text; }
+          console.error(`UpdateProgress failed [HTTP ${res.status}]:`, detail || res.statusText || 'No response body');
         } catch (err) {
           console.error('UpdateProgress network error:', err);
         }
