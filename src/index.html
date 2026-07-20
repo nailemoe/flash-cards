@@ -626,7 +626,10 @@
         try {
           const res = await fetch(`/api/GetProgress?userId=${uid}`);
           if (res.ok) { const d = await res.json(); return d.items || []; }
-        } catch { /* offline */ }
+          console.error(`GetProgress failed: HTTP status ${res.status}`);
+        } catch (err) {
+          console.error('GetProgress network error:', err);
+        }
         const s = localStorage.getItem(`progress_${uid}`);
         return s ? JSON.parse(s) : [];
       },
@@ -638,7 +641,10 @@
             body: JSON.stringify({ ...p, userId: uid })
           });
           if (res.ok) return await res.json();
-        } catch { /* offline */ }
+          console.error(`UpdateProgress failed: HTTP status ${res.status}`);
+        } catch (err) {
+          console.error('UpdateProgress network error:', err);
+        }
         // localStorage fallback
         const arr = JSON.parse(localStorage.getItem(`progress_${uid}`) || '[]');
         const idx = arr.findIndex(x => x.wordId === p.wordId);
