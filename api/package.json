@@ -2,7 +2,6 @@
   "name": "flash-cards-api",
   "version": "1.0.0",
   "description": "Flash Cards API for Azure Functions",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
