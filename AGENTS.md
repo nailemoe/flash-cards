@@ -11,10 +11,13 @@
 
 /flash-cards
 │
-├── index.html          # 前端核心页面（包含 Bootstrap 样式与词库数据）
-├── README.md           # 项目说明
+├── src/
+│   ├── index.html       # 前端核心页面
+│   └── data/
+│       └── words.js     # 词库配置文件
+├── README.md            # 项目说明
 │
-└── /api                # 后端管理文件夹（Azure SWA 会自动将其识别为 Serverless 函数）
+└── /api                 # 后端管理文件夹（Azure SWA 会自动将其识别为 Serverless 函数）
     ├── package.json    # 后端依赖配置（声明安装 @azure/cosmos 驱动）
     │
     ├── /GetProgress    # 获取进度的 API 函数
