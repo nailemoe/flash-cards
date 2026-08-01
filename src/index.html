@@ -378,6 +378,77 @@
       margin-left: 4px;
     }
 
+    /* ─── 响应式自适应 (iPad 横屏/桌面宽屏) ─── */
+    @media (min-width: 768px) {
+      .app-container {
+        max-width: 920px;
+        padding: 16px 24px 24px;
+      }
+
+      .header-logo { margin-bottom: 12px; }
+      .header-logo h1 { font-size: 1.25rem; }
+      .header-logo p { font-size: 0.8rem; }
+
+      /* 主题页平铺 4 列 */
+      .theme-group {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+      .theme-card { padding: 16px 12px; }
+      .theme-card .icon { font-size: 1.6rem; margin-bottom: 4px; }
+      .theme-card .title { font-size: 0.88rem; }
+      .theme-card .desc { font-size: 0.72rem; }
+      .start-btn-wrap { margin-top: 16px; }
+
+      /* 答题页双列 */
+      .quiz-body-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: start;
+      }
+
+      .flash-card {
+        padding: 24px 20px;
+        min-height: 150px;
+      }
+
+      .word-display { font-size: 2rem; }
+
+      .options-list {
+        margin-top: 0;
+      }
+
+      .option-btn {
+        padding: 11px 16px;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+      }
+
+      .feedback-area {
+        margin-top: 12px;
+        padding: 12px 16px;
+      }
+
+      .next-btn {
+        margin-top: 8px;
+        padding: 8px 28px;
+        font-size: 0.9rem;
+      }
+
+      .streak-badge, .theme-bar {
+        margin-bottom: 8px;
+      }
+
+      .progress-bar-custom {
+        margin-bottom: 12px;
+      }
+
+      .stats-bar {
+        margin-top: 12px;
+      }
+    }
+
     @media (max-width: 576px) {
       .word-display { font-size: 2rem; }
       .flash-card { padding: 28px 20px; }
@@ -443,21 +514,27 @@
         <div class="progress-fill" id="progressFill" style="width: 0%"></div>
       </div>
 
-      <div class="flash-card" id="flashCard">
-        <div class="word-row">
-          <div class="word-display" id="wordDisplay">—</div>
-          <button class="speak-btn" id="speakWordBtn" onclick="speakWord()" title="听发音" style="display:none;">
-            <i class="bi bi-volume-up-fill"></i>
-          </button>
+      <div class="quiz-body-grid">
+        <div class="quiz-left-col">
+          <div class="flash-card" id="flashCard">
+            <div class="word-row">
+              <div class="word-display" id="wordDisplay">—</div>
+              <button class="speak-btn" id="speakWordBtn" onclick="speakWord()" title="听发音" style="display:none;">
+                <i class="bi bi-volume-up-fill"></i>
+              </button>
+            </div>
+            <div class="question-hint" id="questionHint"></div>
+          </div>
+
+          <div class="feedback-area" id="feedbackArea">
+            <div id="feedbackText"></div>
+            <button class="next-btn" onclick="nextQuestion()">下一题 →</button>
+          </div>
         </div>
-        <div class="question-hint" id="questionHint"></div>
-      </div>
 
-      <div class="options-list" id="optionsList"></div>
-
-      <div class="feedback-area" id="feedbackArea">
-        <div id="feedbackText"></div>
-        <button class="next-btn" onclick="nextQuestion()">下一题 →</button>
+        <div class="quiz-right-col">
+          <div class="options-list" id="optionsList"></div>
+        </div>
       </div>
 
       <!-- 无更多题目状态 -->
