@@ -322,6 +322,62 @@
     .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
     .empty-state p { opacity: 0.85; margin: 4px 0; }
 
+    /* ─── 发音按钮 ─── */
+    .speak-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: #eef2ff;
+      color: var(--primary);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      vertical-align: middle;
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+
+    .speak-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .speak-btn:active { transform: scale(0.95); }
+
+    .speak-btn.speaking {
+      animation: pulse-speak 0.8s ease infinite;
+    }
+
+    @keyframes pulse-speak {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    .word-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .feedback-word {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .feedback-word .speak-btn {
+      width: 28px;
+      height: 28px;
+      font-size: 0.9rem;
+      margin-left: 4px;
+    }
+
     @media (max-width: 576px) {
       .word-display { font-size: 2rem; }
       .flash-card { padding: 28px 20px; }
@@ -388,7 +444,12 @@
       </div>
 
       <div class="flash-card" id="flashCard">
-        <div class="word-display" id="wordDisplay">—</div>
+        <div class="word-row">
+          <div class="word-display" id="wordDisplay">—</div>
+          <button class="speak-btn" id="speakWordBtn" onclick="speakWord()" title="听发音" style="display:none;">
+            <i class="bi bi-volume-up-fill"></i>
+          </button>
+        </div>
         <div class="question-hint" id="questionHint"></div>
       </div>
 
@@ -417,6 +478,34 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="data/words.js"></script>
   <script>
+    // ==================== 发音引擎 ====================
+    function speak(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      u.rate = 0.85;
+      return u;
+    }
+
+    function speakWord() {
+      if (!currentWord) return;
+      const btn = document.getElementById('speakWordBtn');
+      const u = speak(currentWord.word);
+      if (!u) return;
+      btn.classList.add('speaking');
+      u.onend = () => btn.classList.remove('speaking');
+      window.speechSynthesis.speak(u);
+    }
+
+    function speakAnswer(text, btnEl) {
+      const u = speak(text);
+      if (!u) return;
+      btnEl.classList.add('speaking');
+      u.onend = () => btnEl.classList.remove('speaking');
+      window.speechSynthesis.speak(u);
+    }
+
     // 主题元数据
 
     // 主题元数据
@@ -677,6 +766,7 @@
 
       // 渲染卡片
       document.getElementById('wordDisplay').textContent = currentWord.word;
+      document.getElementById('speakWordBtn').style.display = '';
       document.getElementById('questionHint').innerHTML =
         `${currentWord.meaning} <span style="color:#9ca3af;font-size:0.85rem;">(${meta.label})</span>`;
 
@@ -741,7 +831,7 @@
             <i class="bi bi-check-circle-fill"></i> 回答正确！
           </div>
           <div style="margin:8px 0;font-size:0.95rem;color:#374151;">
-            ${currentWord.word} → <b>${correct}</b>
+            ${currentWord.word} → <span class="feedback-word"><b>${correct}</b><button class="speak-btn" onclick="speakAnswer('${correct}', this)" title="听发音"><i class="bi bi-volume-up-fill"></i></button></span>
           </div>
           <div style="font-size:0.8rem;color:#9ca3af;">
             熟练度 ${Math.round(progress.proficiency * 100)}% · ${progress.interval}天后复习
@@ -752,7 +842,7 @@
             <i class="bi bi-x-circle-fill"></i> 回答错误
           </div>
           <div style="margin:8px 0;font-size:0.95rem;color:#374151;">
-            正确答案: <b>${correct}</b>
+            正确答案: <span class="feedback-word"><b>${correct}</b><button class="speak-btn" onclick="speakAnswer('${correct}', this)" title="听发音"><i class="bi bi-volume-up-fill"></i></button></span>
           </div>
           <div style="font-size:0.8rem;color:#9ca3af;">
             间隔已重置，请加强记忆
